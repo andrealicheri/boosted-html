@@ -1,3 +1,21 @@
+function handleImport() {
+    const importTags = document.querySelectorAll("include");
+    importTags.forEach(importElement => {
+        const url = importElement.getAttribute("url");
+
+        if (url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    importElement.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error("Error fetching content:", error);
+                });
+        }
+    });
+}
+
 function readTag() {
     let readTags = document.getElementsByTagName("read")
     for (var i = 0; i < readTags.length; i++) {
@@ -30,6 +48,8 @@ function replaceTag() {
     }
 }
 
+
+
 function idCheck() {
     const idSet = new Set();
     const duplicateIds = [];
@@ -49,6 +69,7 @@ function idCheck() {
 
 function main() {
     document.addEventListener('DOMContentLoaded', idCheck);
+    handleImport()
     readTag()
     replaceTag()
 }
