@@ -1,36 +1,56 @@
-function hideTemplates() {
-    let temps = document.getElementsByTagName("component")
-    for (let i = 0; i < temps.length; i++) {
-        temps[i].style.display = "none";
-        temps[i].style.visibility = "hidden";
-    }
-}
-
-hideTemplates()
-
-function renderComponent(name, template) {
-    let elements = document.getElementsByTagName(name);
-    for (let i = 0; i < elements.length; i++) {
-        let element = elements[i];
-        let content = template;
-        let attributes = element.attributes;
-        for (let j = 0; j < attributes.length; j++) {
-            let attr = attributes[j];
-            let value = attr.value;
-            content = content.replace(new RegExp("\\$" + attr.name, "g"), value);
+function readTag() {
+    let readTags = document.getElementsByTagName("read")
+    for (var i = 0; i < readTags.length; i++) {
+        let tag = readTags[i]
+        const slot = tag.innerHTML
+        var variable = tag.getAttribute("target")
+        let target = document.getElementById(variable)
+        if (target) {
+            tag.innerHTML = target.innerHTML.replace("<slot />", slot).replace("<slot>", slot)
+        } else {
+            console.error('boosted-html error: read target with id "', variable, '" not found')
         }
-        
-        element.outerHTML = content;
     }
 }
 
-function createComponent() {
-    let comps = document.getElementsByTagName("component")
-    for (let i = 0; i < comps.length; i++) {
-        var compName = comps[i].getAttribute("name")
-        var compTemplate = comps[i].innerHTML
-        renderComponent(compName, compTemplate)
+function replaceTag() {
+    let replaceTags = document.getElementsByTagName("replace")
+    for (var i = 0; i < replaceTags.length; i++) {
+        let tag = replaceTags[i]
+        var variable = tag.getAttribute("target")
+        var from = tag.getAttribute("from")
+        var to = tag.getAttribute("to")
+        let target = document.getElementById(variable)
+        if (target) {
+            target.innerHTML = target.innerHTML.replace(from, to)
+        } else {
+            console.error('boosted-html error: replace target with id "', variable, '" not found')
+        }
+        tag.remove()
     }
 }
 
-createComponent()
+function idCheck() {
+    const idSet = new Set();
+    const duplicateIds = [];
+    const elementsWithIds = document.querySelectorAll('[id]');
+    elementsWithIds.forEach(element => {
+        const id = element.id;
+        if (idSet.has(id)) {
+            duplicateIds.push(id);
+        } else {
+            idSet.add(id);
+        }
+    });
+    if (duplicateIds.length > 0) {
+        console.error('boosted-html error: duplicated id found (', duplicateIds, ')');
+    }
+}
+
+function main() {
+    document.addEventListener('DOMContentLoaded', idCheck);
+    readTag()
+    replaceTag()
+}
+
+main()

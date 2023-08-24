@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script defer src="/main.js"></script>
+    <script defer src="/boostedhtml.js"></script>
 </head>
 <body>
-    <component name="test">
-        <p>Hi $you</p>
-    </component>
-
-    <test you="Watson" />
+    <template id="lol">
+        <p>Hello <slot /></p>
+    </template>
+    <read target="lol" id="test">Andrea</read>
 </body>
 </html>
