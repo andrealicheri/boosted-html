@@ -48,7 +48,33 @@ function replaceTag() {
     }
 }
 
+function generateRandomString(length) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let randomString = "";
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        randomString += charset[randomIndex];
+    }
+    return randomString;
+}
 
+function nestedTemplate() {
+    const scopedElements = document.querySelectorAll('[scoped]');
+    scopedElements.forEach(element => {
+        const randomId = generateRandomString(64);
+        element.setAttribute("class", randomId)
+        element.setAttribute("style", "all:initial")
+        const styleTags = element.querySelectorAll('style');
+        styleTags.forEach(styleTag => {
+            const cssText = styleTag.textContent.trim();
+            const modifiedCssText = cssText.replace(/([^{]+)\{/g, (_, selectors) => {
+                const modifiedSelectors = selectors.split(',').map(selector => `.${randomId} ${selector.trim()}`).join(', ');
+                return `${modifiedSelectors} {`;
+            });
+            styleTag.textContent = modifiedCssText;
+        });
+    });
+};
 
 function idCheck() {
     const idSet = new Set();
@@ -68,10 +94,11 @@ function idCheck() {
 }
 
 function main() {
-    document.addEventListener('DOMContentLoaded', idCheck);
+    idCheck()
     handleImport()
     readTag()
     replaceTag()
+    nestedTemplate()
 }
 
 main()
