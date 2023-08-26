@@ -1,3 +1,29 @@
+function checkStructure() {
+    var htmlContent = document.documentElement.innerHTML;
+
+    if (!document.querySelector('html')) {
+      var htmlElement = document.createElement('html');
+      document.replaceChild(htmlElement, document.documentElement);
+      htmlElement.innerHTML = htmlContent;
+    }
+  
+    if (!document.querySelector('body')) {
+      var bodyElement = document.createElement('body');
+      document.querySelector('html').appendChild(bodyElement);
+      bodyElement.innerHTML = htmlContent;
+    }
+
+    if (!document.querySelector('head')) {
+        var headElement = document.createElement('head');
+        document.querySelector('html').insertBefore(headElement, document.querySelector('body'));
+    } else {
+        // Since the head will be wrapped inside the body tag, we take it out
+        const head = document.head
+        document.createElement('head').remove()
+        document.querySelector('html').insertBefore(head, document.querySelector('body'));
+    }
+}
+
 function handleImport() {
     const importTags = document.querySelectorAll("include");
     importTags.forEach(importElement => {
@@ -24,6 +50,7 @@ function readTag() {
         var variable = tag.getAttribute("target")
         let target = document.getElementById(variable)
         if (target) {
+            // Rudimental slot implementation
             tag.innerHTML = target.innerHTML.replace("<slot />", slot).replace("<slot>", slot)
         } else {
             console.error('boosted-html error: read target with id "', variable, '" not found')
@@ -48,6 +75,7 @@ function replaceTag() {
     }
 }
 
+// Needed for nestedTemplate()
 function generateRandomString(length) {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let randomString = "";
@@ -76,6 +104,7 @@ function nestedTemplate() {
     });
 };
 
+// Component logic relies on single IDs, so this check is crucial to avoid a lot of Github issues
 function idCheck() {
     const idSet = new Set();
     const duplicateIds = [];
@@ -94,6 +123,7 @@ function idCheck() {
 }
 
 function main() {
+    checkStructure()
     idCheck()
     handleImport()
     readTag()
