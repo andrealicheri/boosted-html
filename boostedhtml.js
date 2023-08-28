@@ -1,26 +1,27 @@
-function checkStructure() {
-    var htmlContent = document.documentElement.innerHTML;
+// boosted-html main framework
 
-    if (!document.querySelector('html')) {
-      var htmlElement = document.createElement('html');
-      document.replaceChild(htmlElement, document.documentElement);
-      htmlElement.innerHTML = htmlContent;
-    }
-  
-    if (!document.querySelector('body')) {
-      var bodyElement = document.createElement('body');
-      document.querySelector('html').appendChild(bodyElement);
-      bodyElement.innerHTML = htmlContent;
-    }
+function normalize() {
+    const linkElement = document.createElement("link");
+    linkElement.rel = "stylesheet";
+    linkElement.href = "https://gist.githubusercontent.com/andrealicheri/f936346f5f0a1e70b7cf4eb388975d30/raw/9663622bcb0d90a4d28a3d84a631236cf3b979ad/gistfile1.txt";
+    document.head.appendChild(linkElement);
+}
 
-    if (!document.querySelector('head')) {
-        var headElement = document.createElement('head');
-        document.querySelector('html').insertBefore(headElement, document.querySelector('body'));
-    } else {
-        // Since the head will be wrapped inside the body tag, we take it out
-        const head = document.head
-        document.createElement('head').remove()
-        document.querySelector('html').insertBefore(head, document.querySelector('body'));
+// Component logic relies on single IDs, so this check is crucial to avoid a lot of Github issues
+function idCheck() {
+    const idSet = new Set();
+    const duplicateIds = [];
+    const elementsWithIds = document.querySelectorAll('[id]');
+    elementsWithIds.forEach(element => {
+        const id = element.id;
+        if (idSet.has(id)) {
+            duplicateIds.push(id);
+        } else {
+            idSet.add(id);
+        }
+    });
+    if (duplicateIds.length > 0) {
+        console.error('boosted-html error: duplicated id found (', duplicateIds, ')');
     }
 }
 
@@ -36,10 +37,27 @@ function handleImport() {
                     importElement.innerHTML = html;
                 })
                 .catch(error => {
-                    console.error("Error fetching content:", error);
+                    console.error("boosted-html error: failed to retrieve include (", error, ")");
                 });
         }
     });
+}
+
+function componentTag() {
+    const comps = document.querySelectorAll('[component]')
+    comps.forEach(element => {
+        let outerHTML = element.outerHTML;
+        let tag = outerHTML.split("<")[1].split(" ")[0]
+        let toUse = document.createElement("read")
+        toUse.setAttribute("target", tag)
+        element.removeAttribute("component")
+        for (var j = 0; j < element.attributes.length; j++) {
+            var attr = element.attributes[j];
+            toUse.setAttribute(attr.name, attr.value);
+        }
+        element.parentNode.replaceChild(toUse, element)
+    })
+
 }
 
 function readTag() {
@@ -75,7 +93,6 @@ function replaceTag() {
     }
 }
 
-// Needed for nestedTemplate()
 function generateRandomString(length) {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let randomString = "";
@@ -104,31 +121,76 @@ function nestedTemplate() {
     });
 };
 
-// Component logic relies on single IDs, so this check is crucial to avoid a lot of Github issues
-function idCheck() {
-    const idSet = new Set();
-    const duplicateIds = [];
-    const elementsWithIds = document.querySelectorAll('[id]');
-    elementsWithIds.forEach(element => {
-        const id = element.id;
-        if (idSet.has(id)) {
-            duplicateIds.push(id);
-        } else {
-            idSet.add(id);
-        }
-    });
-    if (duplicateIds.length > 0) {
-        console.error('boosted-html error: duplicated id found (', duplicateIds, ')');
-    }
-}
-
 function main() {
-    checkStructure()
     idCheck()
     handleImport()
+    componentTag()
     readTag()
     replaceTag()
     nestedTemplate()
 }
 
 main()
+
+// Since the main() function is re-executed every time boosted-router changes page, modern normalize
+// is added only on page load.
+normalize()
+
+// boosted-router
+
+function duplicateRemover(element) {
+    const metaTags = document.querySelectorAll(element);
+    const uniqueMetaTags = {};
+    metaTags.forEach(metaTag => {
+        const tagContent = metaTag.outerHTML;
+        if (uniqueMetaTags[tagContent]) {
+            metaTag.parentNode.removeChild(metaTag);
+        } else {
+            uniqueMetaTags[tagContent] = true;
+        }
+    });
+}
+
+function processContent(htmlContent) {
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+    const titleElement = tempElement.querySelector('title');
+    if (titleElement) {
+        document.title = titleElement.textContent;
+        titleElement.remove()
+    }
+    const metaTags = tempElement.querySelectorAll('meta');
+    metaTags.forEach(metaTag => {
+        metaTag.parentNode.removeChild(metaTag);
+    });
+    return tempElement.innerHTML;
+}
+
+function updateBodyContent(path) {
+    fetch(path)
+        .then(response => response.text())
+        .then(content => {
+            document.body.innerHTML = processContent(content)
+            duplicateRemover("script"); duplicateRemover("link");
+            main()
+        })
+        .catch(error => {
+            window.location.href = path
+        });
+}
+
+function navigateTo(path) {
+    history.pushState(null, null, path);
+    updateBodyContent(path);
+}
+
+window.addEventListener('popstate', () => updateBodyContent(window.location.pathname) && main());
+
+document.addEventListener('click', (event) => {
+    const target = event.target;
+    const closestRouteDiv = target.closest('div[route]');
+    if (closestRouteDiv && target.tagName === 'A') {
+        event.preventDefault();
+        navigateTo(target.getAttribute('href'));
+    }
+});
