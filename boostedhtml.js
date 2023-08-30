@@ -1,9 +1,8 @@
 // boosted-html main framework
 
 function normalize() {
-    const linkElement = document.createElement("link");
-    linkElement.rel = "stylesheet";
-    linkElement.href = "https://gist.githubusercontent.com/andrealicheri/f936346f5f0a1e70b7cf4eb388975d30/raw/9663622bcb0d90a4d28a3d84a631236cf3b979ad/gistfile1.txt";
+    const linkElement = document.createElement("style");
+    linkElement.innerHTML = `progress,sub,sup{vertical-align:baseline}*,::after,::before{box-sizing:border-box}html{font-family:system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji';line-height:1.15;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4}body{margin:0}hr{height:0;color:inherit}abbr[title]{text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}::-moz-focus-inner{border-style:none;padding:0}:-moz-focusring{outline:ButtonText dotted 1px}:-moz-ui-invalid{box-shadow:none}legend{padding:0}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}`
     document.head.appendChild(linkElement);
 }
 
@@ -47,8 +46,10 @@ function componentTag() {
     const comps = document.querySelectorAll('[component]')
     comps.forEach(element => {
         let outerHTML = element.outerHTML;
+        let innerHTML = element.innerHtml
         let tag = outerHTML.split("<")[1].split(" ")[0]
         let toUse = document.createElement("read")
+        toUse.innerHTML = innerHTML
         toUse.setAttribute("target", tag)
         element.removeAttribute("component")
         for (var j = 0; j < element.attributes.length; j++) {
@@ -68,8 +69,12 @@ function readTag() {
         var variable = tag.getAttribute("target")
         let target = document.getElementById(variable)
         if (target) {
-            // Rudimental slot implementation
-            tag.innerHTML = target.innerHTML.replace("<slot />", slot).replace("<slot>", slot)
+            var content = target.innerHTML
+            let slotTags = target.getElementsByTagName('p');
+            slotTags.forEach(tag => {
+                content = content.replace(tag.outerHTML, slot)
+            })
+            tag.innerHTML = content
         } else {
             console.error('boosted-html error: read target with id "', variable, '" not found')
         }
