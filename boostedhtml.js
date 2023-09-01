@@ -26,11 +26,13 @@ function idCheck() {
 
 function handleImport() {
     const importTags = document.querySelectorAll("include");
+    const fetchPromises = [];
+
     importTags.forEach(importElement => {
         const url = importElement.getAttribute("url");
 
         if (url) {
-            fetch(url)
+            const fetchPromise = fetch(url)
                 .then(response => response.text())
                 .then(html => {
                     importElement.innerHTML = html;
@@ -38,8 +40,21 @@ function handleImport() {
                 .catch(error => {
                     console.error("boosted-html error: failed to retrieve include (", error, ")");
                 });
+
+            fetchPromises.push(fetchPromise);
         }
     });
+
+    return Promise.all(fetchPromises);
+}
+
+function templates() {
+    const functions = document.getElementsByTagName("function")
+    for (let i = 0; i < functions.length; i++) {
+        let func = functions[i]
+        func.style.display = "none"
+        func.style.visibility = "hidden"
+    }
 }
 
 function componentTag() {
@@ -61,25 +76,28 @@ function componentTag() {
 
 }
 
+
 function readTag() {
-    let readTags = document.getElementsByTagName("read")
-    for (var i = 0; i < readTags.length; i++) {
-        let tag = readTags[i]
-        const slot = tag.innerHTML
-        var variable = tag.getAttribute("target")
-        let target = document.getElementById(variable)
+    let readTags = document.getElementsByTagName("read");
+    for (let i = 0; i < readTags.length; i++) {
+        let tag = readTags[i];
+        const slot = tag.innerHTML;
+        let variable = tag.getAttribute("target");
+        let target = document.getElementById(variable);
         if (target) {
-            var content = target.innerHTML
-            let slotTags = target.getElementsByTagName('p');
-            slotTags.forEach(tag => {
-                content = content.replace(tag.outerHTML, slot)
-            })
-            tag.innerHTML = content
+            let content = target.innerHTML;
+            let slotTags = target.getElementsByTagName('slot');
+            for (let j = 0; j < slotTags.length; j++) {
+                let slotTag = slotTags[j];
+                content = content.replace(slotTag.outerHTML, slot)
+            }
+            tag.innerHTML = content; 
         } else {
-            console.error('boosted-html error: read target with id "', variable, '" not found')
+            console.error('boosted-html error: read target with id "', variable, '" not found');
         }
     }
 }
+
 
 function replaceTag() {
     let replaceTags = document.getElementsByTagName("replace")
@@ -108,10 +126,12 @@ function generateRandomString(length) {
     return randomString;
 }
 
+
+
 function nestedTemplate() {
     const scopedElements = document.querySelectorAll('[scoped]');
     scopedElements.forEach(element => {
-        const randomId = generateRandomString(64);
+        const randomId = generateRandomString(32);
         element.setAttribute("class", randomId)
         element.setAttribute("style", "all:initial")
         const styleTags = element.querySelectorAll('style');
@@ -126,10 +146,11 @@ function nestedTemplate() {
     });
 };
 
-function main() {
+async function main() {
     idCheck()
-    handleImport()
+    await handleImport()
     componentTag()
+    templates()
     readTag()
     replaceTag()
     nestedTemplate()
@@ -191,11 +212,13 @@ function navigateTo(path) {
 
 window.addEventListener('popstate', () => updateBodyContent(window.location.pathname) && main());
 
-document.addEventListener('click', (event) => {
-    const target = event.target;
-    const closestRouteDiv = target.closest('div[route]');
-    if (closestRouteDiv && target.tagName === 'A') {
+const elementsWithRouteAttribute = document.querySelectorAll('[route]');
+elementsWithRouteAttribute.forEach((element) => {
+  const anchorElements = element.querySelectorAll('a');
+  anchorElements.forEach((anchor) => {
+    anchor.addEventListener('click', (event) => {
         event.preventDefault();
-        navigateTo(target.getAttribute('href'));
-    }
+        navigateTo(anchor.getAttribute('href'));
+    });
+  });
 });
