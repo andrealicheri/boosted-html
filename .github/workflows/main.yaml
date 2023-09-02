@@ -23,7 +23,7 @@ jobs:
 
       - name: Build and minify JavaScript with Webpack
         run: |
-          npx webpack --mode=production
+          npx webpack ./boostedhtml.js --mode=production
 
       - name: Generate a random tag
         id: random-tag
