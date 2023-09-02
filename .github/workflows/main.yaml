@@ -28,36 +28,27 @@ jobs:
           npx webpack ./boostedhtml.js --mode=production
           mv ./dist/main.js ./boostedhtml.min.js
 
-      - name: Generate Random Tag
-        id: random_tag
-        run: echo "v$(date '+%Y%m%d%H%M%S')-$(openssl rand -hex 6)"
-
       - name: Commit and Push Changes
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ./boostedhtml.min.js
-          git commit -m "Builded minified boosted-html"
+          git commit -m "Update BoostedHTML.js"
           git tag $(echo "${{ steps.random_tag.outputs.stdout }}" | tr -d '\n')
           git push origin main --tags
 
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./boostedhtml.js
-          tag_name: ${{ steps.random_tag.outputs.stdout }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set Release Title and Body
         run: |
-          RELEASE_ID=${{ steps.create_release.outputs.id }}
+          RELEASE_NAME=$(git tag -l --sort=-v:refname | head -n 1)
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           BODY="Commit Message: $COMMIT_MESSAGE"
-          echo "Updating release $RELEASE_ID with title and body: $BODY"
-          curl -X PATCH \
+          echo "Creating release $RELEASE_NAME with title and body: $BODY"
+
+          curl -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            --data "{\"name\": \"$BODY\"}" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID"
+            --data "{\"tag_name\":\"$RELEASE_NAME\",\"name\":\"$BODY\"}" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases"
+
+          echo "Release $RELEASE_NAME created."
+
