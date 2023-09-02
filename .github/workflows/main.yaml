@@ -1,0 +1,54 @@
+name: Release on Commit
+
+on:
+  push:
+    branches:
+      - main # Adjust to your main branch name
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+
+      - name: Install required npm packages
+        run: npm install --save-dev webpack webpack-cli terser
+
+      - name: Build and minify JavaScript with Webpack
+        run: |
+          npx webpack --mode=production
+
+      - name: Generate a random tag
+        id: random-tag
+        run: echo "::set-output name=tag::$(openssl rand -hex 5)"
+
+      - name: Create release
+        id: create-release
+        run: |
+          TAG=${{ steps.random-tag.outputs.tag }}
+          TITLE=$(git log --format=%B -n 1)
+          BODY=$(git log --format=%s%n%b -n 1)
+          
+          response=$(curl --request POST "https://api.github.com/repos/${{ github.repository }}/releases" \
+            --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+            --data '{
+              "tag_name": "'"$TAG"'",
+              "name": "'"$TITLE"'",
+              "body": "'"$BODY"'"
+            }')
+
+          RELEASE_URL=$(echo "$response" | jq -r .html_url)
+          echo "Release URL: $RELEASE_URL"
+
+          curl --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+            --header "Content-Type: application/zip" \
+            --request POST \
+            --data-binary "@./dist/boostedhtml.js" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_URL/assets?name=boostedhtml.js"
