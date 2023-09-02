@@ -1,4 +1,5 @@
 // boosted-html main framework
+// lol
 
 function normalize() {
     const linkElement = document.createElement("style");
