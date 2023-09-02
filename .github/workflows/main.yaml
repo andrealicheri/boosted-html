@@ -30,6 +30,8 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
+          rm -rf node_modules
+          rm -f package-lock.json
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ./boostedhtml.min.js
