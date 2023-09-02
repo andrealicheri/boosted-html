@@ -21,9 +21,6 @@ jobs:
       - name: Build JavaScript with Webpack
         run: npx webpack ./boostedhtml.js --mode=production
 
-      - name: Copy main.js to ./dist directory
-        run: mv ./main.js ./dist/main.js
-
       - name: Add main.js to the repository
         run: git add ./dist/main.js
 
