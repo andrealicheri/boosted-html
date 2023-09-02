@@ -1,9 +1,9 @@
-name: Release on Commit
+name: Release when "boostedhtml.js" changes
 
 on:
   push:
-    branches:
-      - main # Adjust to your main branch name
+    paths:
+      - 'boostedhtml.js'
 
 jobs:
   release:
@@ -18,12 +18,20 @@ jobs:
           curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
           sudo apt-get install -y nodejs
 
-      - name: Install required npm packages
-        run: npm install --save-dev webpack webpack-cli terser
+      - name: Build JavaScript with Webpack
+        run: npx webpack ./boostedhtml.js --mode=production
 
-      - name: Build and minify JavaScript with Webpack
-        run: |
-          npx webpack ./boostedhtml.js --mode=production
+      - name: Copy main.js to ./dist directory
+        run: mv ./main.js ./dist/main.js
+
+      - name: Add main.js to the repository
+        run: git add ./dist/main.js
+
+      - name: Commit changes
+        run: git commit -m "Add main.js to the repository"
+
+      - name: Push changes
+        run: git push
 
       - name: Generate a random tag
         id: random-tag
@@ -35,10 +43,10 @@ jobs:
           TAG=${{ steps.random-tag.outputs.tag }}
           TITLE=$(git log --format=%B -n 1)
           BODY=$(git log --format=%s%n%b -n 1)
-
+          
           # Create a release using GitHub API
           response=$(curl --request POST "https://api.github.com/repos/${{ github.repository }}/releases" \
-            --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+            --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \  # Use GIT_TOKEN here
             --data '{
               "tag_name": "'"$TAG"'",
               "name": "'"$TITLE"'",
@@ -49,9 +57,9 @@ jobs:
           RELEASE_URL=$(echo "$response" | jq -r .html_url)
           echo "Release URL: $RELEASE_URL"
 
-          # Upload the minified file as an asset to the release
-          curl --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+          # Upload the source code (main.js) as an asset to the release
+          curl --header "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \  # Use GIT_TOKEN here
             --header "Content-Type: application/javascript" \
             --request POST \
-            --data-binary "@./dist/main.min.js" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_URL/assets?name=main.min.js"
+            --data-binary "@./dist/main.js" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_URL/assets?name=main.js"
