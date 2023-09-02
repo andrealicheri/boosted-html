@@ -24,11 +24,26 @@ jobs:
       - name: Add main.js to the repository
         run: git add ./dist/main.js
 
-      - name: Commit changes
+      - name: Push changes with curl
         run: |
+          # Configure Git with the GitHub username and email
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git push https://${{ secrets.GIT_TOKEN }}@github.com/${{ github.repository }}.git
+
+          # Stage the changes
+          git add .
+    
+          # Commit the changes
+          git commit -m "Add main.js to the repository"
+
+          # Create a branch-specific token to push changes
+          GITHUB_TOKEN_BRANCH="${{ secrets.GIT_TOKEN }}:$GITHUB_REF"
+    
+          # Push the changes using curl
+          curl -X POST -u "$GITHUB_TOKEN_BRANCH" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/${{ github.ref }}" -d '{
+            "sha": "'$(git rev-parse HEAD)'",
+            "force": false
+          }'
 
       - name: Push changes
         run: git push
