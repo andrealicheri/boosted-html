@@ -28,6 +28,10 @@ jobs:
           npx webpack ./boostedhtml.js --mode=production
           mv ./dist/main.js ./boostedhtml.min.js
 
+      - name: Generate Random Tag
+        id: random_tag
+        run: echo "v$(date '+%Y%m%d%H%M%S')-$(openssl rand -hex 6)"
+
       - name: Commit and Push Changes
         run: |
           rm -rf node_modules
@@ -41,16 +45,16 @@ jobs:
 
       - name: Create Release
         run: |
-          RELEASE_NAME=$(git tag -l --sort=-v:refname | head -n 1)
+          TAG_NAME=$(echo "${{ steps.random_tag.outputs.stdout }}" | tr -d '\n')
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           BODY="Commit Message: $COMMIT_MESSAGE"
-          echo "Creating release $RELEASE_NAME with title and body: $BODY"
+          echo "Creating release $TAG_NAME with title and body: $BODY"
 
           curl -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            --data "{\"tag_name\":\"$RELEASE_NAME\",\"name\":\"$BODY\"}" \
+            --data "{\"tag_name\":\"$TAG_NAME\",\"name\":\"$BODY\"}" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases"
 
-          echo "Release $RELEASE_NAME created."
+          echo "Release $TAG_NAME created."
 
