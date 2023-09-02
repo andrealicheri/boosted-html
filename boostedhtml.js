@@ -61,7 +61,7 @@ function componentTag() {
     const comps = document.querySelectorAll('[component]')
     comps.forEach(element => {
         let outerHTML = element.outerHTML;
-        let innerHTML = element.innerHtml
+        let innerHTML = element.innerHTML; 
         let tag = outerHTML.split("<")[1].split(" ")[0]
         let toUse = document.createElement("read")
         toUse.innerHTML = innerHTML
@@ -73,7 +73,6 @@ function componentTag() {
         }
         element.parentNode.replaceChild(toUse, element)
     })
-
 }
 
 
@@ -85,13 +84,24 @@ function readTag() {
         let variable = tag.getAttribute("target");
         let target = document.getElementById(variable);
         if (target) {
-            let content = target.innerHTML;
-            let slotTags = target.getElementsByTagName('slot');
+            let content = '';
+
+            if (target.tagName.toLowerCase() === 'template') {
+                const contentNodes = target.content.childNodes;
+                contentNodes.forEach((node) => {
+                    content += node.nodeType === Node.ELEMENT_NODE ? node.outerHTML : node.textContent;
+                });
+            } else {
+                content = target.innerHTML;
+            }
+
+            tag.innerHTML = content;
+
+            let slotTags = tag.getElementsByTagName('slot');
             for (let j = 0; j < slotTags.length; j++) {
                 let slotTag = slotTags[j];
-                content = content.replace(slotTag.outerHTML, slot)
+                tag.innerHTML = tag.innerHTML.replace(slotTag.outerHTML, slot);
             }
-            tag.innerHTML = content; 
         } else {
             console.error('boosted-html error: read target with id "', variable, '" not found');
         }
