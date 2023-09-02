@@ -40,7 +40,10 @@ jobs:
           git tag $(echo "${{ steps.random_tag.outputs.stdout }}" | tr -d '\n')
           git push origin main --tags
 
-      - name: "Create release"
-        uses: "ergebnis/.github/actions/github/release/create@1.8.0"
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          files: |
+            ./*  # Include the files you want to attach to the release
+          tag_name: v${{ github.run_number }} 
