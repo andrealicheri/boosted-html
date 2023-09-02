@@ -26,21 +26,27 @@ jobs:
       - name: Build BoostedHTML.js
         run: |
           npx webpack ./boostedhtml.js --mode=production
-          mv ./dist/main.js ./boostedhtml.js
+          mv ./dist/main.js ./boostedhtml.min.js
+
+      - name: Generate Random Tag
+        id: random_tag
+        run: echo "v$(date '+%Y%m%d%H%M%S')-$(openssl rand -hex 6)"
 
       - name: Commit and Push Changes
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add ./boostedhtml.js
-          git commit -m "Update BoostedHTML.js"
-          git push
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add ./boostedhtml.min.js
+          git commit -m "Builded minified boosted-html"
+          git tag $(echo "${{ steps.random_tag.outputs.stdout }}" | tr -d '\n')
+          git push origin main --tags
 
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           files: ./boostedhtml.js
+          tag_name: ${{ steps.random_tag.outputs.stdout }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
