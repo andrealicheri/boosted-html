@@ -48,16 +48,8 @@ function handleImport() {
     return Promise.all(fetchPromises);
 }
 
-function templates() {
-    const functions = document.getElementsByTagName("function")
-    for (let i = 0; i < functions.length; i++) {
-        let func = functions[i]
-        func.style.display = "none"
-        func.style.visibility = "hidden"
-    }
-}
-
 function componentTag() {
+    // This isn't exactly future-proof, so a data-component variant is planned (as much ugly as it would be)
     const comps = document.querySelectorAll('[component]')
     comps.forEach(element => {
         let outerHTML = element.outerHTML;
@@ -85,7 +77,7 @@ function readTag() {
         let target = document.getElementById(variable);
         if (target) {
             let content = '';
-
+            // CrazyHack™ to check that the referenced ID is a template, and use the right proprety accordingly
             if (target.tagName.toLowerCase() === 'template') {
                 const contentNodes = target.content.childNodes;
                 contentNodes.forEach((node) => {
@@ -97,6 +89,7 @@ function readTag() {
 
             tag.innerHTML = content;
 
+            // Slot handling
             let slotTags = tag.getElementsByTagName('slot');
             for (let j = 0; j < slotTags.length; j++) {
                 let slotTag = slotTags[j];
@@ -126,47 +119,47 @@ function replaceTag() {
     }
 }
 
-function generateRandomString(length) {
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let randomString = "";
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * charset.length);
-        randomString += charset[randomIndex];
-    }
-    return randomString;
+function createCustomElement(htmlContent) {
+    const elementName = 'scoped-' + Math.random().toString(36).substring(2);
+    customElements.define(
+        elementName,
+        class extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({ mode: 'open' });
+                shadowRoot.innerHTML = htmlContent;
+            }
+        }
+    );
+    return document.createElement(elementName);
 }
 
-
-
-function nestedTemplate() {
-    const scopedElements = document.querySelectorAll('[scoped]');
-    scopedElements.forEach(element => {
-        const randomId = generateRandomString(32);
-        element.setAttribute("class", randomId);
-        element.setAttribute("style", "all: initial");
-        const styleTags = element.querySelectorAll('style');
-        styleTags.forEach(styleTag => {
-            const cssText = styleTag.textContent.trim();
-            const modifiedCssText = cssText.replace(/([^{}]+)\{/g, (match, selectors) => {
-                const modifiedSelectors = selectors
-                    .split(',')
-                    .map(selector => `.${randomId} ${selector.trim()}`)
-                    .join(', ');
-                return `${modifiedSelectors} {`;
-            });
-            styleTag.textContent = modifiedCssText;
-        });
+function replaceScopedElements(attribute) {
+    const scopedElements = document.querySelectorAll(`[${attribute}]`);
+    scopedElements.forEach((element) => {
+        element.removeAttribute(attribute)
+        const htmlContent = element.outerHTML;
+        const customElement = createCustomElement(htmlContent);
+        for (let i = 0; i < element.attributes.length; i++) {
+            const sourceAttribute = element.attributes[i];
+            customElement.setAttribute(sourceAttribute.name, sourceAttribute.value);
+        }
+        element.parentNode.replaceChild(customElement, element);
     });
+}
+
+function scopedElements() {
+    replaceScopedElements("scoped");
+    replaceScopedElements("data-scoped");
 }
 
 async function main() {
     idCheck()
     await handleImport()
     componentTag()
-    templates()
     readTag()
     replaceTag()
-    nestedTemplate()
+    scopedElements()
 }
 
 main()
@@ -190,6 +183,7 @@ function duplicateRemover(element) {
     });
 }
 
+// Swaps title and removes meta tags
 function processContent(htmlContent) {
     const tempElement = document.createElement('div');
     tempElement.innerHTML = htmlContent;
