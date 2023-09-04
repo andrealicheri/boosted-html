@@ -140,10 +140,6 @@ function replaceScopedElements(attribute) {
         element.removeAttribute(attribute)
         const htmlContent = element.outerHTML;
         const customElement = createCustomElement(htmlContent);
-        for (let i = 0; i < element.attributes.length; i++) {
-            const sourceAttribute = element.attributes[i];
-            customElement.setAttribute(sourceAttribute.name, sourceAttribute.value);
-        }
         element.parentNode.replaceChild(customElement, element);
     });
 }
