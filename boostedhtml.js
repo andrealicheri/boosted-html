@@ -27,10 +27,8 @@ function idCheck() {
 function handleImport() {
     const importTags = document.querySelectorAll("include");
     const fetchPromises = [];
-
     importTags.forEach(importElement => {
         const url = importElement.getAttribute("url");
-
         if (url) {
             const fetchPromise = fetch(url)
                 .then(response => response.text())
@@ -40,17 +38,14 @@ function handleImport() {
                 .catch(error => {
                     console.error("boosted-html error: failed to retrieve include (", error, ")");
                 });
-
             fetchPromises.push(fetchPromise);
         }
     });
-
     return Promise.all(fetchPromises);
 }
 
-function componentTag() {
-    // This isn't exactly future-proof, so a data-component variant is planned (as much ugly as it would be)
-    const comps = document.querySelectorAll('[component]')
+function evaluateComponent(attribute) {
+    const comps = document.querySelectorAll(`[${attribute}]`)
     comps.forEach(element => {
         let outerHTML = element.outerHTML;
         let innerHTML = element.innerHTML;
@@ -67,6 +62,10 @@ function componentTag() {
     })
 }
 
+function componentTag() {
+    evaluateComponent("component")
+    evaluateComponent("data-component")
+}
 
 function readTag() {
     let readTags = document.getElementsByTagName("read");
@@ -83,12 +82,8 @@ function readTag() {
                 contentNodes.forEach((node) => {
                     content += node.nodeType === Node.ELEMENT_NODE ? node.outerHTML : node.textContent;
                 });
-            } else {
-                content = target.innerHTML;
-            }
-
+            } else { content = target.innerHTML; }
             tag.innerHTML = content;
-
             // Slot handling
             let slotTags = tag.getElementsByTagName('slot');
             for (let j = 0; j < slotTags.length; j++) {
@@ -100,7 +95,6 @@ function readTag() {
         }
     }
 }
-
 
 function replaceTag() {
     let replaceTags = document.getElementsByTagName("replace")
