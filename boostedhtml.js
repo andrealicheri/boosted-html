@@ -148,10 +148,6 @@ async function main() {
 
 main()
 
-// Since the main() function is re-executed every time boosted-router changes page, modern normalize
-// is added only on page load.
-normalize()
-
 // boosted-router
 
 function duplicateRemover(element) {
@@ -191,9 +187,9 @@ function updateBodyContent(path) {
             duplicateRemover("script"); duplicateRemover("link");
             main()
         })
-        .catch(error => {
+        .catch(
             window.location.href = path
-        });
+        );
 }
 
 function navigateTo(path) {
