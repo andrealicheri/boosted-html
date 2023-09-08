@@ -15,9 +15,7 @@ jobs:
         with:
           path: base-code
       - name: List Files in Root [DEBUG]
-        run: |
-          ls -l
-          ls -l docs
+        run: ls -l
       - name: Checkout wiki code
         uses: actions/checkout@v2
         with:

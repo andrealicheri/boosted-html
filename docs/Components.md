@@ -72,4 +72,3 @@ E.G.: The following code ...
     <template id="test">Hi, my name is $name</template>
     <read target="test" id="test2">Hi, my name is Andrea</read>
     <read target="test" id="test3">Hi, my name is Marco</read>  
-
