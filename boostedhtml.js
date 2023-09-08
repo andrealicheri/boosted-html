@@ -84,6 +84,17 @@ function readTag() {
                 let slotTag = slotTags[j];
                 tag.innerHTML = tag.innerHTML.replace(slotTag.outerHTML, slot);
             }
+            // Didn't want to refactor the code, so just I transfered the read tag to a new one
+            let newDiv = document.createElement("div")
+            var index;
+            while (tag.firstChild) {
+                newDiv.appendChild(tag.firstChild);
+            }
+            for (index = tag.attributes.length - 1; index >= 0; --index) {
+                newDiv.attributes.setNamedItem(tag.attributes[index].cloneNode());
+            }
+            tag.parentNode.replaceChild(newDiv, tag);
+            newDiv.removeAttribute("target")
         } else {
             console.error('boosted-html error: read target with id "', variable, '" not found');
         }
@@ -146,7 +157,12 @@ async function main() {
     scopedElements()
 }
 
-main()
+function reactive() {
+    main()
+    setTimeout(main, 53)
+}
+
+reactive()
 
 // boosted-router
 
@@ -185,7 +201,6 @@ function updateBodyContent(path) {
         .then(content => {
             document.body.innerHTML = processContent(content)
             duplicateRemover("script"); duplicateRemover("link");
-            main()
         })
         .catch(
             window.location.href = path
@@ -197,7 +212,7 @@ function navigateTo(path) {
     updateBodyContent(path);
 }
 
-window.addEventListener('popstate', () => updateBodyContent(window.location.pathname) && main());
+window.addEventListener('popstate', () => updateBodyContent(window.location.pathname));
 
 const elementsWithRouteAttribute = document.querySelectorAll('[route]');
 elementsWithRouteAttribute.forEach((element) => {

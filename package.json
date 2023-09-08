@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "npx eslint ./boostedhtml.js",
-    "build": "npx webpack ./boostedhtml.js --mode=production"
+    "build": "npx webpack ./boostedhtml.js --mode=production",
+    "serve": "python -m http.server 8000"
   },
   "author": "",
   "devDependencies": {
