@@ -1,3 +1,4 @@
 deprecated/*
 examples/test/*
 node_modules/*
+dist/*

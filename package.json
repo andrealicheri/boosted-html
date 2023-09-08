@@ -7,7 +7,8 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx eslint ./boostedhtml.js",
+    "build": "npx webpack ./boostedhtml.js --mode=production"
   },
   "author": "",
   "devDependencies": {
