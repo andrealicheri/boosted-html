@@ -14,8 +14,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: base-code
-      - name: List Files in Root [DEBUG]
-        run: ls -a
       - name: Checkout wiki code
         uses: actions/checkout@v2
         with:
@@ -23,7 +21,7 @@ jobs:
           path: docs
       - name: Push to wiki
         run: |
-          mv README.md docs/Home.md
+          mv base-code/README.md docs/Home.md
           cd docs
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"

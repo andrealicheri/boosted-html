@@ -73,3 +73,4 @@ E.G.: The following code ...
     <read target="test" id="test2">Hi, my name is Andrea</read>
     <read target="test" id="test3">Hi, my name is Marco</read>  
 
+
