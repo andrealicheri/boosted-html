@@ -1,0 +1,29 @@
+name: Documentation
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - 'README.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base code
+        uses: actions/checkout@v2
+        with:
+          path: base-code
+      - name: Checkout wiki code
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.repository}}.wiki
+          path: docs
+      - name: Push to wiki
+        run: |
+          mv README.md docs/Home.md
+          cd docs
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git diff-index --quiet HEAD || git commit -m "Dcoumentation update" && git push
