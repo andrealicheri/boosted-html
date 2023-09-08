@@ -1,6 +1,6 @@
 // boosted-html main framework
 
-// Component logic relies on single IDs, so this check is crucial to avoid a lot of Github issues
+/**  Component logic relies on single IDs. It's crucial to avoid a lot of Github issues */
 function idCheck() {
     const idSet = new Set();
     const duplicateIds = [];
@@ -18,6 +18,7 @@ function idCheck() {
     }
 }
 
+/**  Handles import tags and returns a promise when it finishes */
 function handleImport() {
     const importTags = document.querySelectorAll("include");
     const fetchPromises = [];
@@ -38,6 +39,9 @@ function handleImport() {
     return Promise.all(fetchPromises);
 }
 
+/**  Allows referencing read tags with the component syntax, check the wiki
+ * @param {string} attribute - The component attribute
+*/
 function evaluateComponent(attribute) {
     const comps = document.querySelectorAll(`[${attribute}]`)
     comps.forEach(element => {
@@ -56,11 +60,15 @@ function evaluateComponent(attribute) {
     })
 }
 
+/**  References the evaluateComponent() with the component attribute and the data variant
+ * @see evaluateComponent()
+*/
 function componentTag() {
     evaluateComponent("component")
     evaluateComponent("data-component")
 }
 
+/** Evaluates the read tags. Crucial for component logic */
 function readTag() {
     let readTags = document.getElementsByTagName("read");
     for (let i = 0; i < readTags.length; i++) {
@@ -101,6 +109,7 @@ function readTag() {
     }
 }
 
+/** Evaluates the replace tags. Crucial for component logic */
 function replaceTag() {
     let replaceTags = document.getElementsByTagName("replace")
     for (var i = 0; i < replaceTags.length; i++) {
@@ -118,6 +127,9 @@ function replaceTag() {
     }
 }
 
+/** Nestes a specific string in the shadow DOM
+ * @param {string} htmlContent - Defines the specific string
+  */
 function createCustomElement(htmlContent) {
     const elementName = 'scoped-' + Math.random().toString(36).substring(2);
     customElements.define(
@@ -133,6 +145,10 @@ function createCustomElement(htmlContent) {
     return document.createElement(elementName);
 }
 
+/** Nestes elements with a specific attribute with the createCustomElement() function
+ * @param {string} attribute - Defines the specific attribute
+ * @see createCustomElement()
+ */
 function replaceScopedElements(attribute) {
     const scopedElements = document.querySelectorAll(`[${attribute}]`);
     scopedElements.forEach((element) => {
@@ -143,11 +159,15 @@ function replaceScopedElements(attribute) {
     });
 }
 
+/**  References the replaceScopedElements() with the scoped attribute and the data variant
+ * @see replaceScopedElements()
+*/
 function scopedElements() {
     replaceScopedElements("scoped");
     replaceScopedElements("data-scoped");
 }
 
+/** Main boosted-html function, async to await handleImport() */
 async function main() {
     idCheck()
     await handleImport()
@@ -157,12 +177,15 @@ async function main() {
     scopedElements()
 }
 
-function reactive() {
+/** Loops the function indefinetely every time that a specific interval elapses
+ * @param {int} timing - Defines the specific interval
+*/
+function reactive(timing) {
     main()
-    setTimeout(main, 53)
+    setTimeout(main, timing)
 }
 
-reactive()
+reactive(53)
 
 // boosted-router
 
