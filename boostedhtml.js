@@ -28,7 +28,7 @@ function handleImport() {
             const fetchPromise = fetch(url)
                 .then(response => response.text())
                 .then(html => {
-                    importElement.innerHTML = html;
+                    importElement.outerHTML = html;
                 })
                 .catch(error => {
                     console.error("boosted-html error: failed to retrieve include (", error, ")");
