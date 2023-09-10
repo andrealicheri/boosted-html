@@ -21,7 +21,8 @@ jobs:
           path: docs
       - name: Push to wiki
         run: |
-          mv base-code/README.md docs/Home.md
+          mv base-code/README.md base-code/docs/Home.md
+          mv base-code/docs/* docs/
           cd docs
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
