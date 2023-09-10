@@ -45,11 +45,9 @@ function handleImport() {
 function evaluateComponent(attribute) {
     const comps = document.querySelectorAll(`[${attribute}]`)
     comps.forEach(element => {
-        let outerHTML = element.outerHTML;
-        let innerHTML = element.innerHTML;
-        let tag = outerHTML.split("<")[1].split(" ")[0]
+        let tag = element.tagName.toLowerCase()
         let toUse = document.createElement("read")
-        toUse.innerHTML = innerHTML
+        toUse.innerHTML = element.innerHTML;
         toUse.setAttribute("target", tag)
         element.removeAttribute("component")
         for (var j = 0; j < element.attributes.length; j++) {
@@ -68,30 +66,40 @@ function componentTag() {
     evaluateComponent("data-component")
 }
 
-/** Evaluates the read tags. Crucial for component logic */
+/** Evaluates the read tags. Crucial for component logic (element reproduction) */
 function readTag() {
     let readTags = document.getElementsByTagName("read");
     for (let i = 0; i < readTags.length; i++) {
         let tag = readTags[i];
-        const slot = tag.innerHTML;
         let variable = tag.getAttribute("target");
         let target = document.getElementById(variable);
-        if (target) {
+        const slot = tag.innerHTML;
+        if (!variable) {
+            console.error('boosted-html error: read target not mentioned')
+        } else if (!target) {
+            console.error('boosted-html error: read target with id "', variable, '" not found');
+        } else {
             let content = '';
+
             // CrazyHack™ to check that the referenced ID is a template, and use the right proprety accordingly
             if (target.tagName.toLowerCase() === 'template') {
                 const contentNodes = target.content.childNodes;
                 contentNodes.forEach((node) => {
                     content += node.nodeType === Node.ELEMENT_NODE ? node.outerHTML : node.textContent;
                 });
-            } else { content = target.innerHTML; }
+            } else { 
+                content = target.innerHTML; 
+            }
+
             tag.innerHTML = content;
+
             // Slot handling
             let slotTags = tag.getElementsByTagName('slot');
             for (let j = 0; j < slotTags.length; j++) {
                 let slotTag = slotTags[j];
                 tag.innerHTML = tag.innerHTML.replace(slotTag.outerHTML, slot);
             }
+            
             // Didn't want to refactor the code, so just I transfered the read tag to a new one
             let newDiv = document.createElement("div")
             var index;
@@ -99,17 +107,19 @@ function readTag() {
                 newDiv.appendChild(tag.firstChild);
             }
             for (index = tag.attributes.length - 1; index >= 0; --index) {
-                newDiv.attributes.setNamedItem(tag.attributes[index].cloneNode());
+                newDiv.attributes.setNamedItem(tag.attributes[index].cloneNode()); 
+            }
+            for (var j = 0; j < newDiv.attributes.length; j++) {
+                var attr = newDiv.attributes[j];
+                newDiv.innerHTML = newDiv.innerHTML.replace(`{{prop:${attr.name}}}`, attr.value)
             }
             tag.parentNode.replaceChild(newDiv, tag);
             newDiv.removeAttribute("target")
-        } else {
-            console.error('boosted-html error: read target with id "', variable, '" not found');
         }
     }
 }
 
-/** Evaluates the replace tags. Crucial for component logic */
+/** Evaluates the replace tags. Crucial for component logic (imperative templating) */
 function replaceTag() {
     let replaceTags = document.getElementsByTagName("replace")
     for (var i = 0; i < replaceTags.length; i++) {
