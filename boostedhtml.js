@@ -98,14 +98,14 @@ class boostedHTML {
 
                 // Slot handling
                 let slotTags = tag.getElementsByTagName('slot');
-                if(!tag.hasAttribute("data-original-slot")) {
+                if (!tag.hasAttribute("data-original-slot")) {
                     tag.setAttribute("data-original-slot", slot)
                 }
                 for (let j = 0; j < slotTags.length; j++) {
                     let slotTag = slotTags[j];
                     tag.innerHTML = tag.innerHTML.replace(slotTag.outerHTML, tag.getAttribute("data-original-slot"));
                 }
-                
+
                 // Prop templates handling
                 for (var j = 0; j < tag.attributes.length; j++) {
                     var attr = tag.attributes[j];
@@ -173,6 +173,47 @@ class boostedHTML {
         boosted.replaceScopedElements("data-scoped");
     }
 
+    /** Writes a read tag to a specific element outerHTML
+    * @param {string} target - The target of the read tag
+    * @param {HTMLelement} element - The reference of the specific element
+    */
+    writeFunction(target, element) {
+        let toSet = element ?? event.target
+        toSet.outerHTML = `<read id="${element.id}" target="${target}"></read>`
+    }
+
+    /** Custom event listener with a custom prefix that interfaces with writeFunction()
+     * @param {string} prefix - The name of the prefix
+     */
+    htmlEventListener(prefix) {
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(element => {
+            let toSet = "null"
+            const attributes = element.attributes;
+            for (var j = 0; j < attributes.length; j++) {
+                var attr = attributes[j];
+                if (attr.name.startsWith(prefix + ":target")) {
+                    toSet = `document.getElementById("${attr.value}")`
+                }
+            }
+            for (var j = 0; j < attributes.length; j++) {
+                var attr = attributes[j];
+                if (attr.name.startsWith(prefix + ":")) {
+                    const newAttribute = attr.name.slice(prefix.length + 1)
+                    const newValue = `boosted.writeFunction("${attr.value}", ${toSet})`
+                    element.removeAttribute(attr.name)
+                    element.setAttribute(newAttribute, newValue)
+                }
+            }
+        });
+    }
+
+    interactivity() {
+        boosted.htmlEventListener("html")
+        boosted.htmlEventListener("data-html")
+    }
+
+
     /** Main boosted-html function, async to await handleImport() */
     async main() {
         boosted.idCheck()
@@ -181,8 +222,9 @@ class boostedHTML {
         boosted.readTag()
         boosted.replaceTag()
         boosted.scopedElements()
+        boosted.interactivity()
     }
- 
+
     /** Loops a function indefinetely every time that a specific interval elapses
     * @param {Function} func - The function to be looped
     * @param {number} timing - Defines the specific interval
