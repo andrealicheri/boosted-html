@@ -196,8 +196,8 @@ class boostedHTML {
                     toSet = `document.getElementById("${attr.value}")`
                 }
             }
-            for (var j = 0; j < attributes.length; j++) {
-                var attr = attributes[j];
+            for (j = 0; j < attributes.length; j++) {
+                attr = attributes[j];
                 if (attr.name.startsWith(prefix + ":")) {
                     const newAttribute = attr.name.slice(prefix.length + 1)
                     const newValue = `boosted.writeFunction("${attr.value}", ${toSet})`
