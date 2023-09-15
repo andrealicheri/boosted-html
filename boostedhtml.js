@@ -111,6 +111,15 @@ class boostedHTML {
                     var attr = tag.attributes[j];
                     tag.innerHTML = tag.innerHTML.replace(`{{prop:${attr.name}}}`, attr.value)
                 }
+
+                if (tag.hasAttribute("data-boosted-internal-event")) {
+                    var newDiv = document.createElement("div")
+                    newDiv.innerHTML = tag.innerHTML
+                    if (tag.id != "" ) {
+                        newDiv.id = tag.id
+                    }
+                    tag.replaceWith(newDiv)
+                }
             }
         }
     }
@@ -179,7 +188,13 @@ class boostedHTML {
     */
     writeFunction(target, element) {
         let toSet = element ?? event.target
-        toSet.outerHTML = `<read id="${element.id}" target="${target}"></read>`
+        var isID = ""
+        if (!element.hasAttribute("discard-attribute")) {
+            isID = `id="${toSet.id}"`
+        } else {
+            isID = ""
+        }
+        toSet.outerHTML = `<read data-boosted-internal-event ${isID} target="${target}"></read>`
     }
 
     /** Custom event listener with a custom prefix that interfaces with writeFunction()
@@ -190,14 +205,15 @@ class boostedHTML {
         allElements.forEach(element => {
             let toSet = "null"
             const attributes = element.attributes;
-            for (var j = 0; j < attributes.length; j++) {
-                var attr = attributes[j];
-                if (attr.name.startsWith(prefix + ":target")) {
-                    toSet = `document.getElementById("${attr.value}")`
+            if (element.hasAttribute("?target")) {
+                toSet = `document.getElementById("${element.getAttribute("?target")}")`
+                if (element.hasAttribute("?discard-attribute")) {
+                    let targetElement = element.getAttribute("?target")
+                    document.getElementById(targetElement).setAttribute("discard-attribute", true)
                 }
             }
-            for (j = 0; j < attributes.length; j++) {
-                attr = attributes[j];
+            for (let j = 0; j < attributes.length; j++) {
+                let attr = attributes[j];
                 if (attr.name.startsWith(prefix + ":")) {
                     const newAttribute = attr.name.slice(prefix.length + 1)
                     const newValue = `boosted.writeFunction("${attr.value}", ${toSet})`
