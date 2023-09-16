@@ -26,8 +26,8 @@ jobs:
         run: |
           cd cli
           python build.py
-          rm -f blaze.spec
-          
+          rm -Force blaze.spec
+
       - name: Commit and Push Changes
         run: |
           git config user.name "Your Name"
