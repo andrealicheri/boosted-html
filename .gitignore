@@ -3,3 +3,5 @@ examples/test/
 node_modules/
 dist/
 *.test.html
+*.exe
+cli/

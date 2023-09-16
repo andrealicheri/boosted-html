@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/boostedhtml.min.js"></script>
+    <link rel="manifest" href="/app.webmanifest">
+    <script>
+        const registerServiceWorker = async () => {
+            if ("serviceWorker" in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register("/sw.js", {
+                        scope: "/",
+                    });
+                    if (registration.installing) {
+                        console.log("Service worker installing");
+                    } else if (registration.waiting) {
+                        console.log("Service worker installed");
+                    } else if (registration.active) {
+                        console.log("Service worker active");
+                    }
+                } catch (error) {
+                    console.error(`Registration failed with ${error}`);
+                }
+            }
+        };
+        registerServiceWorker();
+    </script>
+</head>
+
+<body>
+    <template id="helloworld">
+        <p>Hello, {{prop:name}}</p>
+    </template>
+    <read target="helloworld" name="Andrea"></read>
+</body>
+
+</html>

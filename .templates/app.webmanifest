@@ -1,0 +1,10 @@
+{
+    "short_name": "boosted",
+    "name": "Empty boosted-html app",
+    "start_url": "/",
+    "background_color": "#FF8C00",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#FF8C00",
+    "description": "Project generared by Blaze"
+}
