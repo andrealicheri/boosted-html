@@ -1,0 +1,36 @@
+name: Blaze
+
+on:
+    push:
+      paths:
+        - 'blaze.py'
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install Dependencies
+        run: |
+          cd cli
+          pip install -r requirements.txt  
+
+      - name: Run Script
+        run: |
+          cd cli
+          python build.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "Your Name"
+          git config user.email "your.email@example.com"
+          git add .
+          git commit -m "Auto commit by GitHub Actions"
+          git push origin main  
