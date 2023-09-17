@@ -2,7 +2,7 @@ boosted-html comes with an (optional) CLI called blaze.
 
 ## Installation
 
-Blaze doesn't come with an installer. You can download the single executable [here]() and run it with:
+Blaze doesn't come with an installer. You can download the single executable [here](https://github.com/andrealicheri/boosted-html/raw/main/cli/blaze.exe) and run it with:
 
     ./blaze <command here>
 

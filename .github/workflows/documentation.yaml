@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/**'
       - 'README.md'
+      - 'cli/README.md'
 
 jobs:
   build:
@@ -22,6 +23,7 @@ jobs:
       - name: Push to wiki
         run: |
           mv base-code/README.md base-code/docs/Home.md
+          mv base-code/cli/README.md base-code/docs/CLI.md
           mv base-code/docs/* docs/
           cd docs
           git config --local user.email "action@github.com"

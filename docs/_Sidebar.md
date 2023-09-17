@@ -5,4 +5,5 @@
 - ### [Imports](https://github.com/andrealicheri/boosted-html/wiki/Imports)
 - ### [Imports](https://github.com/andrealicheri/boosted-html/wiki/Interactivity)
 - ### [Scoping](https://github.com/andrealicheri/boosted-html/wiki/Scoping)
+- ### [CLI](https://github.com/andrealicheri/boosted-html/wiki/CLI)
 - ### [Best Practices](https://github.com/andrealicheri/boosted-html/wiki/Best-Practices)
