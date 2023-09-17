@@ -26,6 +26,7 @@ jobs:
         run: |
           cd cli
           python build.py
+          
 
       - name: Commit and Push Changes
         run: |
