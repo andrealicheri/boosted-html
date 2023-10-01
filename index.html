@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/boostedhtml.js"></script>
+</head>
+
+<body style="font-family: monospace;">
+    <style>
+        * {
+            padding: 0%;
+            border: 0%;
+            margin: 0%;
+        }
+    </style>
+    <div style="background-color: orange; text-align: right; padding: 10px; font-size: 2em;">
+        <a href="/webdocs/">Docs</a>
+    </div>
+    <div style="background-color: orange;">
+        <div style="display: flex; justify-content: center; ">
+            <img style="margin-left: 3em" src="/webdocs/logo.svg" />
+        </div>
+        <p style="text-align: center; padding: 10px; font-size: 2rem;">Add modern UI features to
+            HTML</p>
+    </div>
+
+    <div style="background-color: darksalmon; display: flex; justify-content: center; align-items: center; font-size: 1.5em;">
+        <div style="padding: 10px;">
+            <div
+                style="color: white; background-color: rgb(36, 36, 36); margin: 40px; padding: 10px; border-radius: 5px;">
+                <code><span style="color: rgb(240, 90, 115);">&lt;script <span style="color: greenyellow;">src=</span><span style="color: rgb(250, 239, 35);">"https://andrealicheri.github.io/boosted-html/boostedhtml.min.js"</span>&gt;</span><span style="color: rgb(240, 90, 115);">&lt;/script&gt;</span></code>
+            </div>
+        </div>
+        <p style="padding: 10px;"><strong>Try it right away!</strong></p>
+    </div>
+    <div style="background-color: rgb(211, 211, 211);">
+        <template id="ui-card">
+            <div style="flex: 1; text-align: center; background-color: beige; border-radius: 15px; margin: 20px;">
+                <img src="{{prop:img-source}}" width="100px" style="padding: 30px;" />
+                <h2 style="margin: 10px;">{{prop:heading}}</h2>
+                <p style="padding: 10px; font-size: 1.5em;">
+                    <slot></slot>
+                </p>
+            </div>
+        </template>
+        <div style="display: flex; justify-content: center;">
+            <div b-read="ui-card" heading="No Javascript"
+                img-source="https://cdn-icons-png.flaticon.com/512/5968/5968292.png">
+                You aren't required to use Javascript when building an app with boosted-html. You can manage all of your
+                application with a set of attributes
+            </div>
+            <div b-read="ui-card" heading="Minimal"
+                img-source="https://cdn3.iconfinder.com/data/icons/arrows-set-2-3/32/arrow_arrows_towards_opposite-512.png">
+                boosted-html weights only 3kb (when <strong>not compressed</strong>). No need to worry about network
+                performance
+            </div>
+            <div b-read="ui-card" heading="Component architecture"
+                img-source="https://cdn-icons-png.flaticon.com/512/1512/1512442.png">
+                boosted-html offers you a component architecture with slots and attribute props to promote a DRY
+                codebase and efficent code reduction
+            </div>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <div b-read="ui-card" heading="HTML imports"
+                img-source="https://cdn-icons-png.flaticon.com/512/679/679821.png">
+                No need to store all of your HTML in one file. You can fetch external HTML easily thanks to boosted-html
+                and start building with it right away
+            </div>
+            <div b-read="ui-card" heading="CSS scoping"
+                img-source="https://cdn-icons-png.flaticon.com/512/8233/8233345.png">
+                You can scope elements automatically, so that the element CSS doesn't interact with the body and
+                viceversa
+            </div>
+            <div b-read="ui-card" heading="No build step"
+                img-source="https://emojigraph.org/media/facebook/wing_1fabd.png">
+                There's no build step: every change you make to the document is automatically updated in the browser
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

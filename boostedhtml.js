@@ -21,11 +21,11 @@ class boostedHTML {
     }
 
     /**  Handles import tags and returns a promise when it finishes */
-    handleImport() {
-        const importTags = document.querySelectorAll("include");
+    handleImport(attribute) {
+        const importTags = document.querySelectorAll(`[${attribute}]`);
         const fetchPromises = [];
         importTags.forEach(importElement => {
-            const url = importElement.getAttribute("url");
+            const url = importElement.getAttribute(attribute);
             if (url) {
                 const fetchPromise = fetch(url)
                     .then(response => response.text())
@@ -41,16 +41,16 @@ class boostedHTML {
         return Promise.all(fetchPromises);
     }
 
-    /**  Allows referencing read tags with the component syntax, check the wiki
+    /**  Allows referencing b-read attributes with the component syntax, check the wiki
      * @param {string} attribute - The component attribute
     */
     evaluateComponent(attribute) {
         const comps = document.querySelectorAll(`[${attribute}]`)
         comps.forEach(element => {
             let tag = element.tagName.toLowerCase()
-            let toUse = document.createElement("read")
+            let toUse = document.createElement("div")
             toUse.innerHTML = element.innerHTML;
-            toUse.setAttribute("target", tag)
+            toUse.setAttribute("b-read", tag)
             element.removeAttribute("component")
             for (var j = 0; j < element.attributes.length; j++) {
                 var attr = element.attributes[j];
@@ -60,27 +60,17 @@ class boostedHTML {
         })
     }
 
-    /**  References the evaluateComponent() with the component attribute and the data variant
-     * @see evaluateComponent()
-    */
-    componentTag() {
-        boosted.evaluateComponent("component")
-        boosted.evaluateComponent("data-component")
-    }
-
-    /** Evaluates the read tags. Crucial for component logic (element reproduction) */
-    readTag() {
-        let readTags = document.getElementsByTagName("read");
-        for (let i = 0; i < readTags.length; i++) {
-            boosted.slotCount += 1
-            let tag = readTags[i];
-            let variable = tag.getAttribute("target");
+    /** Evaluates the b-read attibute. Crucial for component logic (element reproduction) */
+    readAttribute(attribute) {
+        let readTags = document.querySelectorAll(`*[${attribute}]`);
+        readTags.forEach(element => {
+            let variable = element.getAttribute(attribute);
             let target = document.getElementById(variable);
-            const slot = tag.innerHTML;
+            const slot = element.innerHTML;
             if (!variable) {
-                console.error('boosted-html error: read target not mentioned')
+                console.error('boosted-html error: b-read reference not mentioned')
             } else if (!target) {
-                console.error('boosted-html error: read target with id "', variable, '" not found');
+                console.error('boosted-html error: b-read reference with id "', variable, '" not found');
             } else {
                 let content = '';
 
@@ -94,53 +84,34 @@ class boostedHTML {
                     content = target.innerHTML;
                 }
 
-                tag.innerHTML = content;
+                element.innerHTML = content;
 
                 // Slot handling
-                let slotTags = tag.getElementsByTagName('slot');
-                if (!tag.hasAttribute("data-original-slot")) {
-                    tag.setAttribute("data-original-slot", slot)
+                let slotTags = element.getElementsByTagName('slot');
+                if (!element.hasAttribute("data-original-slot")) {
+                    element.setAttribute("data-original-slot", slot)
                 }
                 for (let j = 0; j < slotTags.length; j++) {
                     let slotTag = slotTags[j];
-                    tag.innerHTML = tag.innerHTML.replace(slotTag.outerHTML, tag.getAttribute("data-original-slot"));
+                    element.innerHTML = element.innerHTML.replace(slotTag.outerHTML, element.getAttribute("data-original-slot"));
                 }
 
                 // Prop templates handling
-                for (var j = 0; j < tag.attributes.length; j++) {
-                    var attr = tag.attributes[j];
-                    tag.innerHTML = tag.innerHTML.replace(`{{prop:${attr.name}}}`, attr.value)
+                for (var j = 0; j < element.attributes.length; j++) {
+                    var attr = element.attributes[j];
+                    var regex = new RegExp(`{{prop:${attr.name}}}`, 'g');
+                    element.innerHTML = element.innerHTML.replace(regex, attr.value);
                 }
 
-                if (tag.hasAttribute("data-boosted-internal-event")) {
-                    var newDiv = document.createElement("div")
-                    newDiv.innerHTML = tag.innerHTML
-                    if (tag.id != "" ) {
-                        newDiv.id = tag.id
-                    }
-                    tag.replaceWith(newDiv)
+                if (!element.hasAttribute("data-boosted-internal-event")) {
+                    element.setAttribute("ref-boost-read", variable)
                 }
+
+                element.removeAttribute(attribute)
             }
-        }
+        })
     }
 
-    /** Evaluates the replace tags. Crucial for component logic (imperative templating) */
-    replaceTag() {
-        let replaceTags = document.getElementsByTagName("replace")
-        for (var i = 0; i < replaceTags.length; i++) {
-            let tag = replaceTags[i]
-            var variable = tag.getAttribute("target")
-            var from = tag.getAttribute("from")
-            var to = tag.getAttribute("to")
-            let target = document.getElementById(variable)
-            if (target) {
-                target.innerHTML = target.innerHTML.replace(from, to)
-            } else {
-                console.error('boosted-html error: replace target with id "', variable, '" not found')
-            }
-            tag.remove()
-        }
-    }
 
     /** Nestes a specific string in the shadow DOM
      * @param {string} htmlContent - Defines the specific string
@@ -174,27 +145,32 @@ class boostedHTML {
         });
     }
 
-    /**  References the replaceScopedElements() with the scoped attribute and the data variant
-     * @see replaceScopedElements()
-    */
-    scopedElements() {
-        boosted.replaceScopedElements("scoped");
-        boosted.replaceScopedElements("data-scoped");
+    generateRandomString(length) {
+        const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let randomString = "";
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charset.length);
+            randomString += charset[randomIndex];
+        }
+        return randomString;
     }
 
-    /** Writes a read tag to a specific element outerHTML
-    * @param {string} target - The target of the read tag
+    /** Writes a b-read tag to a specific element outerHTML
+    * @param {string} target - The reference of the b-read attribute
     * @param {HTMLelement} element - The reference of the specific element
     */
     writeFunction(target, element) {
-        let toSet = element ?? event.target
+        let toSet = element != false ? element : event.target.innerHTML
         var isID = ""
-        if (!element.hasAttribute("discard-attribute")) {
-            isID = `id="${toSet.id}"`
-        } else {
-            isID = ""
-        }
-        toSet.outerHTML = `<read data-boosted-internal-event ${isID} target="${target}"></read>`
+        toSet.outerHTML = `<div data-boosted-internal-event b-read="${target}"></div>`
+        let readTags = document.querySelectorAll(`*[ref-boost-read]`);
+        readTags.forEach(element => {
+            var test = element.getAttribute("ref-boost-read")
+            element.removeAttribute("ref-boost-read")
+            element.setAttribute("b-read", test)
+
+        })
+        boosted.main()
     }
 
     /** Custom event listener with a custom prefix that interfaces with writeFunction()
@@ -203,14 +179,10 @@ class boostedHTML {
     htmlEventListener(prefix) {
         const allElements = document.querySelectorAll('*');
         allElements.forEach(element => {
-            let toSet = "null"
+            let toSet = "false"
             const attributes = element.attributes;
             if (element.hasAttribute("?target")) {
                 toSet = `document.getElementById("${element.getAttribute("?target")}")`
-                if (element.hasAttribute("?discard-attribute")) {
-                    let targetElement = element.getAttribute("?target")
-                    document.getElementById(targetElement).setAttribute("discard-attribute", true)
-                }
             }
             for (let j = 0; j < attributes.length; j++) {
                 let attr = attributes[j];
@@ -224,34 +196,75 @@ class boostedHTML {
         });
     }
 
-    interactivity() {
-        boosted.htmlEventListener("html")
-        boosted.htmlEventListener("data-html")
+
+    /** Execute a function whenever the DOM isn't changed by the same
+    * @param {Function} func - The function to be looped
+    */
+    reactive() {
+        // OK!
+        let readTags = document.querySelectorAll(`*[b-read]`);
+        console.log(readTags.length)
+        if (readTags.length > 0) {
+            boosted.readAttribute("b-read")
+        }
+
+        // OK!
+        let importTags = document.querySelectorAll(`*[b-import]`);
+        if (importTags.length > 0) {
+            boosted.handleImport("b-import")
+        }
+
+        // OK!
+        let componentTags = document.querySelectorAll(`*[b-component]`);
+        if (componentTags.length > 0) {
+            boosted.evaluateComponent("b-component")
+        }
+        // OK!
+        let scopedTags = document.querySelectorAll(`*[b-scoped]`);
+        if (scopedTags.length > 0) {
+            boosted.replaceScopedElements("b-scoped")
+        }
+
+        // OK!
+        let onTags = document.querySelectorAll(`*[b-import]`);
+        if (onTags.length > 0) {
+            boosted.handleImport("b-import")
+        }
+
+        boosted.idCheck()
+
+
     }
 
+    beReactive() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    boosted.reactive()
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 
     /** Main boosted-html function, async to await handleImport() */
     async main() {
         boosted.idCheck()
-        await boosted.handleImport()
-        boosted.componentTag()
-        boosted.readTag()
-        boosted.replaceTag()
-        boosted.scopedElements()
-        boosted.interactivity()
+        boosted.handleImport("b-import")
+        boosted.evaluateComponent("b-component")
+        boosted.readAttribute("b-read")
+        boosted.replaceScopedElements("b-scoped")
+        boosted.htmlEventListener("b-read")
     }
 
-    /** Loops a function indefinetely every time that a specific interval elapses
-    * @param {Function} func - The function to be looped
-    * @param {number} timing - Defines the specific interval
-    */
-    reactive(func, timing) {
-        func
-        setInterval(func, timing)
-    }
 }
 
 const boosted = new boostedHTML();
-
-// This interval was choosen because no human can notice delay at it
-boosted.reactive(boosted.main, 53)
+document.addEventListener("DOMContentLoaded", (event) => {
+    boosted.main()
+    boosted.beReactive()
+});

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/boostedhtml.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <p>This style...</p>
+    <style>
+        p {
+            color: rgb(71, 127, 127);
+        }
+    </style>
+    <div b-scoped>
+        <p>...doesn't apply to me...</p>
+        <style>
+            p {
+                color: rgb(19, 104, 19)
+            }
+        </style>
+    </div>
+
+    <div b-scoped>
+        <p>...and not even to me</p>
+    </div>
+
+
+</body>
+
+</html>

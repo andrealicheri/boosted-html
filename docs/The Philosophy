@@ -1,0 +1,17 @@
+Just as any other UI framework, boosted-html applies a set of principles to itself:
+
+## No JS required for interactivity
+
+This is what differences boosted-html from other UI frameworks: you aren't required to write a single line of JavaScript to make your app interactive, nor to make it easy an fun to work with. You would be better off using literally anything else if you would still need writing JS.
+
+## Minimalism
+
+boosted-html should be a minimal utility that allows you to achieve your goals just as you would with any big UI framework like React, Vue or Svelte. It should be an even more minimal Alpine.js
+
+## Every element is re-usable
+
+Every element can be re-used as a component by referncing its ID and manipulated accordingly. No need for Web Component constructors
+
+## Keep it simple
+
+What's the point in doing brain gymnastic with a custom library when you could directly use the native platform? To avoid this, boosted-html tries to keep it simple and consistant (on the line of minimalism)

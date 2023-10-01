@@ -28,7 +28,7 @@ def generate(arg):
 
 
 def populate():
-    tag_to_add = '<script defer src="/boostedhtml.min.js"></script>'
+    tag_to_add = '<script src="/boostedhtml.min.js"></script>'
 
     for filename in os.listdir():
         if filename.endswith(".html"):

@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>Layer 1</title>
+  <path id="svg_4" d="m106,209.2l110,0l0,206.00002l-110,0l0,-206.00002z" transform="rotate(39.2108, 161, 312.2)" opacity="undefined" stroke="#000" fill="#ffb672"/>
+  <path transform="rotate(-51.8473, 248.9, 272.2)" id="svg_5" d="m170.39999,236.20001l157,0l0,72l-157,0l0,-72z" opacity="undefined" stroke="#000" fill="#e8d0d0"/>
+  <text transform="matrix(3.86921, 0, 0, 3.962, -523.44, -680.08)" font-style="italic" xml:space="preserve" text-anchor="start" font-family="monospace" font-size="24" stroke-width="0" id="svg_7" y="256.59951" x="154.6012" stroke="#000" fill="#000000">boosted-html</text>
+ </g>
+</svg>

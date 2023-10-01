@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/boostedhtml.js"></script>
+    <title>Wiki</title>
+</head>
+
+<body>
+    <div style="display: flex;">
+
+        <!-- For every instance of this component, another component is initializated with the id
+        of the page proprety. When the generated anchor is clicked -->
+        <template id="link">
+            <template id="{{prop:page}}">
+                <div b-import="/webdocs/{{prop:page}}.html"></div>
+            </template>
+            <li>
+                <p style="margin-top: 0px;"><a href="#" b-read:onclick="{{prop:page}}"
+                        ?target="content">{{prop:page}}</a></p>
+            </li>
+        </template>
+
+        <div style="flex: 1; flex-direction: column;">
+            <div b-scoped style="height: 100vh; padding: 10px; font-size: 1.5rem;">
+                <ul>
+                    <div b-read="link" page="Home"></div>
+                    <div b-read="link" page="Home"></div>
+                </ul>
+                <style>
+                    * {
+                        background-color: orange;
+                        font-family: monospace;
+                    }
+                </style>
+            </div>
+        </div>
+
+        <div style="flex: 3; padding: 30px; font-family: monospace; font-size: 1.2rem; background-color: hsl(28, 100%, 71%);">
+                <div b-import="/webdocs/Home.html"></div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+            
+        }
+    </style>
+
+</body>
+
+</html>
