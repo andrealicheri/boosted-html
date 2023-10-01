@@ -161,7 +161,6 @@ class boostedHTML {
     */
     writeFunction(target, element) {
         let toSet = element != false ? element : event.target.innerHTML
-        var isID = ""
         toSet.outerHTML = `<div data-boosted-internal-event b-read="${target}"></div>`
         let readTags = document.querySelectorAll(`*[ref-boost-read]`);
         readTags.forEach(element => {
@@ -264,7 +263,7 @@ class boostedHTML {
 }
 
 const boosted = new boostedHTML();
-document.addEventListener("DOMContentLoaded", (event) => {
+document.addEventListener("DOMContentLoaded", () => {
     boosted.main()
     boosted.beReactive()
 });
